@@ -13,42 +13,41 @@ module.exports = (req, res) => {
     return res.status(400).send({ error: 'Invalid number of dice or sides. Both must be positive numbers.' });
   }
 
+  // Initialize results array and variables for advantage/disadvantage
   let results = [];
-  let total = 0;
   let advantageResult = 0;
   let disadvantageResult = Infinity;
-  
-  for (let i = 0; i < Math.max(numberOfDice, 2); i++) { // Ensure at least two rolls for adv/disadv
+
+  // Determine the number of rolls: default to numberOfDice, but 2 for adv/disadv
+  const rollsNeeded = modifier ? 2 : numberOfDice;
+
+  for (let i = 0; i < rollsNeeded; i++) {
     const result = Math.floor(Math.random() * sides) + 1;
     results.push(result);
-    total += result;
     advantageResult = Math.max(advantageResult, result);
     disadvantageResult = Math.min(disadvantageResult, result);
   }
 
   // Adjust response based on modifier
-  let response = {
-    roll,
-    results,
-    total
-  };
-
+  let response = {};
   if (modifier === 'a') {
     response = {
       roll,
-      results,
-      advantageResult, // Take the highest result for advantage
-      total: advantageResult
+      result: advantageResult, // Only return the highest result for advantage
     };
   } else if (modifier === 'd') {
     response = {
       roll,
-      results,
-      disadvantageResult, // Take the lowest result for disadvantage
-      total: disadvantageResult
+      result: disadvantageResult, // Only return the lowest result for disadvantage
+    };
+  } else {
+    // For standard rolls, return the first result and ignore others
+    response = {
+      roll,
+      result: results[0], // Only return the first result for a standard roll
     };
   }
 
-  // Return the modified response based on the presence of an advantage or disadvantage
+  // Send the appropriate response
   res.status(200).send(response);
 };
