@@ -2,6 +2,12 @@ module.exports = (req, res) => {
   // Extract the roll parameter from the query string (e.g., "2d6", "1d20a", "1d20d")
   const { roll } = req.query;
 
+  // Check if the roll parameter is provided; if not, ask the user for the type of die
+  if (!roll) {
+    // If no roll parameter is specified, prompt the user to provide one
+    return res.status(400).send({ error: 'Please specify the type of die to roll. For example, "1d20" for a standard 20-sided die roll.' });
+  }
+
   // Use regular expression to parse the roll parameter
   // This captures the number of dice, sides of the dice, and whether it's advantage or disadvantage
   const match = roll.match(/^(\d+)d(\d+)([ad]?)$/);
